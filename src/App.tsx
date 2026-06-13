@@ -66,6 +66,10 @@ export default function App() {
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
+    const metaThemeColor = document.getElementById("theme-meta-color");
+    if (metaThemeColor) {
+      metaThemeColor.setAttribute("content", theme === "dark" ? "#050505" : "#F5F5F7");
+    }
   }, [theme]);
 
   const toggleTheme = () => {

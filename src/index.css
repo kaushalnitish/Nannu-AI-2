@@ -15,7 +15,7 @@ html, body {
   width: 100%;
   min-height: 100dvh;
   overflow-x: hidden;
-  overscroll-behavior: auto; /* Restores normal scrolling while using background alignment to mask elastic bounce visually */
+  overscroll-behavior: auto; /* Restores normal scrolling on mobile Safari and Chrome */
   -webkit-tap-highlight-color: transparent;
   scroll-behavior: smooth;
 }
@@ -261,19 +261,9 @@ html[data-theme="light"] body {
 
 /* Bottom Navigation Floating Glass Dock (Linear + Apple Level Luxe) */
 [data-theme="light"] .fixed.bottom-0 {
-  background-color: transparent !important;
-  border-top-color: transparent !important;
-  backdrop-filter: none !important;
-}
-
-[data-theme="light"] .fixed.bottom-0 > .max-w-md {
-  background-color: rgba(255, 255, 255, 0.8) !important;
+  background-color: rgba(245, 245, 247, 0.85) !important;
   backdrop-filter: blur(28px) saturate(190%) !important;
-  border-color: rgba(0, 0, 0, 0.05) !important;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04), 
-              0 2px 8px rgba(0, 0, 0, 0.02), 
-              inset 0 1px 0 rgba(255, 255, 255, 0.85) !important;
-  border-width: 1px !important;
+  border-top: 1px solid rgba(0, 0, 0, 0.05) !important;
 }
 
 /* Glass indicators for active navbar selection */
