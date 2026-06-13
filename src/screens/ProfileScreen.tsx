@@ -305,7 +305,7 @@ export default function ProfileScreen({
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0 }}
-      className="flex flex-col flex-1 pb-24"
+      className="flex flex-col flex-1 pb-4"
     >
       {/* 1. Header or breadcrumb top segment */}
       <AnimatePresence mode="wait">

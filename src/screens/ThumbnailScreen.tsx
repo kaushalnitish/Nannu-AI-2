@@ -48,7 +48,7 @@ export default function ThumbnailScreen({
       initial={{ opacity: 0, scale: 0.98 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.98 }}
-      className="flex flex-col flex-1 pb-24"
+      className="flex flex-col flex-1 pb-4"
     >
       {/* Header controls */}
       <div className="flex items-center gap-1 mb-5 text-xs font-mono text-[#A1A1AA]">

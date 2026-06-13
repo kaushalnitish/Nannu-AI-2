@@ -9,14 +9,14 @@ const HeroBannerCard = () => {
   const imageUrl = "https://www.image2url.com/r2/default/images/1781201112490-ba80772d-7ecd-4508-b5c0-e6dae68ce1d0.png";
 
   return (
-    <div className="w-full mb-5 relative">
+    <div className="w-full mb-3 shrink-0 relative">
       <div 
         id="hero-banner-card"
-        className="relative bg-white rounded-[16px] sm:rounded-[20px] shadow-sm border border-neutral-200/50 overflow-hidden w-full flex flex-col h-[94px] sm:h-[104px] transition-all duration-300 hover:shadow-md"
+        className="relative bg-white rounded-[14px] sm:rounded-[16px] shadow-sm border border-neutral-200/50 overflow-hidden w-full flex flex-col h-[76px] transition-all duration-300 hover:shadow-md"
       >
         {/* Label top center header band – "FOR YOU" above the creator image */}
-        <div className="w-full bg-white flex items-center justify-center py-1.5 border-b border-neutral-100 shrink-0 select-none">
-          <span className="text-[10px] uppercase font-semibold text-[#8B5CF6] tracking-[0.2em] font-sans whitespace-nowrap">
+        <div className="w-full bg-white flex items-center justify-center py-1 border-b border-neutral-100 shrink-0 select-none">
+          <span className="text-[9px] uppercase font-semibold text-[#8B5CF6] tracking-[0.2em] font-sans whitespace-nowrap">
             FOR YOU
           </span>
         </div>
@@ -122,36 +122,36 @@ export default function WelcomeScreen({
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -15 }}
-      className="flex flex-col flex-1 pb-24"
+      className="flex flex-col flex-1 pb-1"
     >
       {/* Top Brand Banner */}
-      <div className="flex items-center justify-between mb-8 mt-2">
+      <div className="flex items-center justify-between mb-3.5 mt-1 shrink-0">
         <div className="flex items-center gap-2">
-          <div className="p-2.5 rounded-xl bg-gradient-to-tr from-[#FF4FD8] to-[#A855F7] shadow-[0_0_15px_rgba(255,79,216,0.3)]">
-            <Brain size={20} className="text-white" />
+          <div className="p-2 rounded-xl bg-gradient-to-tr from-[#FF4FD8] to-[#A855F7] shadow-[0_0_12px_rgba(255,79,216,0.25)]">
+            <Brain size={18} className="text-white" />
           </div>
           <div>
-            <h1 className="text-sm font-semibold tracking-wider text-white font-mono uppercase">NANNU AI</h1>
-            <p className="text-[10px] text-[#A1A1AA]">Your Personal AI Content Brain</p>
+            <h1 className="text-xs font-semibold tracking-wider text-white font-mono uppercase">NANNU AI</h1>
+            <p className="text-[9px] text-[#A1A1AA]">Your Personal AI Content Brain</p>
           </div>
         </div>
         
         <button
           id="voice-training-tips-btn"
           onClick={() => setIsTipsOpen(true)}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all duration-300 text-[10px] font-mono text-[#D8B4FE] font-semibold tracking-wide shadow-sm hover:shadow-[0_0_10px_rgba(168,85,247,0.15)] cursor-pointer"
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all duration-300 text-[9px] font-mono text-[#D8B4FE] font-semibold tracking-wide shadow-sm hover:shadow-[0_0_10px_rgba(168,85,247,0.15)] cursor-pointer"
         >
-          <Sparkles size={12} className="text-[#FF4FD8] animate-pulse" />
+          <Sparkles size={11} className="text-[#FF4FD8] animate-pulse" />
           <span>VOICE TIPS</span>
         </button>
       </div>
 
       {/* Greeting Heading */}
-      <div className="mb-4 text-left">
-        <h2 className="text-xl font-bold font-sans tracking-tight text-white mb-1">
+      <div className="mb-3 text-left shrink-0">
+        <h2 className="text-lg font-bold font-sans tracking-tight text-white mb-0.5">
           {greeting}
         </h2>
-        <p className="text-xs text-[#A1A1AA] font-sans">
+        <p className="text-[11px] text-[#A1A1AA] font-sans">
           Ready to synthesize? Specify your core content focus below:
         </p>
       </div>
@@ -160,12 +160,12 @@ export default function WelcomeScreen({
       <HeroBannerCard />
 
       {/* Large Glowing Input Box */}
-      <div className="relative group">
-        <div className="absolute -inset-0.5 bg-gradient-to-r from-[#FF4FD8] to-[#A855F7] rounded-2xl blur opacity-30 group-focus-within:opacity-60 transition duration-300" />
-        <GlowCard id="home-topic-input-container" glowColor="pink" className="relative mb-6 flex flex-col p-5 bg-[#090909]/95 border-white/20 shadow-[0_4px_30px_rgba(255,79,216,0.15)]">
-          <div className="flex items-center justify-between mb-3 text-xs font-mono text-white/90">
+      <div className="relative group mb-3.5 shrink-0">
+        <div className="absolute -inset-0.5 bg-gradient-to-r from-[#FF4FD8] to-[#A855F7] rounded-2xl blur opacity-25 group-focus-within:opacity-50 transition duration-300" />
+        <GlowCard id="home-topic-input-container" glowColor="pink" className="relative flex flex-col p-4 bg-[#090909]/95 border-white/20 shadow-[0_4px_25px_rgba(255,79,216,0.12)]">
+          <div className="flex items-center justify-between mb-2 text-[10px] font-mono text-white/90">
             <span className="font-bold tracking-wider uppercase text-[#FF4FD8]">Topic Input Focus</span>
-            <Sparkles size={14} className="text-[#FF4FD8] animate-pulse" />
+            <Sparkles size={12} className="text-[#FF4FD8] animate-pulse" />
           </div>
 
           <textarea
@@ -173,10 +173,10 @@ export default function WelcomeScreen({
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             placeholder="How I got my first high-paying marketing client in 48 hours..."
-            className="bg-transparent text-white text-base font-medium font-sans leading-relaxed resize-none h-28 focus:outline-none border-none placeholder-[#A1A1AA] active:border-none focus:ring-0 p-0"
+            className="bg-transparent text-white text-[14.5px] font-medium font-sans leading-relaxed resize-none h-20 focus:outline-none border-none placeholder-[#A1A1AA] active:border-none focus:ring-0 p-0"
           />
 
-          <div className="flex justify-between items-center text-[10px] font-mono text-[#A1A1AA] mt-2 border-t border-white/5 pt-2">
+          <div className="flex justify-between items-center text-[9px] font-mono text-[#A1A1AA] mt-1.5 border-t border-white/5 pt-1.5">
             <span>Make this complete and specific</span>
             <span className="font-bold">{prompt.length} / 250 characters</span>
           </div>
@@ -184,11 +184,11 @@ export default function WelcomeScreen({
       </div>
 
       {/* Target Generation Language */}
-      <div className="mb-6">
-        <h3 className="text-xs font-mono text-white font-bold uppercase tracking-wider mb-2.5">
+      <div className="mb-3.5 shrink-0">
+        <h3 className="text-[10.5px] font-mono text-white font-bold uppercase tracking-wider mb-2">
           Brain Output Dialect
         </h3>
-        <div className="flex bg-[#090909]/95 p-1.5 rounded-xl border border-white/20 font-sans shadow-lg">
+        <div className="flex bg-[#090909]/95 p-1 rounded-xl border border-white/20 font-sans shadow-lg">
           {[
             { id: "English", label: "English", flag: "🇺🇸" },
             { id: "Hindi", label: "हिंदी (Hindi)", flag: "🇮🇳" },
@@ -200,13 +200,13 @@ export default function WelcomeScreen({
                 id={`lang-btn-${lang.id.toLowerCase()}`}
                 key={lang.id}
                 onClick={() => onLanguageChange(lang.id)}
-                className={`flex-1 py-1.5 text-xs font-extrabold rounded-lg transition-all duration-300 flex items-center justify-center gap-1.5 cursor-pointer ${
+                className={`flex-1 py-1 text-[11px] font-extrabold rounded-lg transition-all duration-300 flex items-center justify-center gap-1 cursor-pointer ${
                   isActive
-                    ? "bg-[#FF4FD8] text-white shadow-[0_0_15px_rgba(255,79,216,0.4)] scale-102"
+                    ? "bg-[#FF4FD8] text-white shadow-[0_0_12px_rgba(255,79,216,0.35)]"
                     : "text-white/75 hover:text-white hover:bg-white/5"
                 }`}
               >
-                <span className="text-sm select-none">{lang.flag}</span>
+                <span className="text-xs select-none">{lang.flag}</span>
                 <span>{lang.label}</span>
               </button>
             );
@@ -215,20 +215,20 @@ export default function WelcomeScreen({
       </div>
 
       {/* Suggestion Chips */}
-      <div className="mb-6">
-        <p className="text-xs font-mono text-white font-bold uppercase tracking-wider mb-2.5">
+      <div className="mb-4 shrink-0">
+        <p className="text-[10.5px] font-mono text-white font-bold uppercase tracking-wider mb-2">
           Suggested Spark Topics
         </p>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-1.5">
           {suggestions.map((item, index) => (
             <button
               id={`suggest-chip-${index}`}
               key={index}
               onClick={() => handleSuggestClick(item.prompt)}
-              className={`text-xs px-3.5 py-2 rounded-full border transition-all duration-300 font-sans cursor-pointer font-medium ${
+              className={`text-[10.5px] px-2.5 py-1 rounded-full border transition-all duration-300 font-sans cursor-pointer font-medium ${
                 prompt === item.prompt
-                  ? "bg-[#FF4FD8] border-[#FF4FD8] text-white shadow-[0_0_15px_rgba(255,79,216,0.35)]"
-                  : "bg-[#090909]/95 border-white/20 text-white hover:bg-white/10 hover:border-white/40"
+                  ? "bg-[#FF4FD8] border-[#FF4FD8] text-white shadow-[0_0_12px_rgba(255,79,216,0.3)]"
+                  : "bg-[#090909]/95 border-white/10 text-white hover:bg-white/10 hover:border-white/30"
               }`}
             >
               {item.title}
@@ -241,35 +241,35 @@ export default function WelcomeScreen({
       <motion.button
         id="home-continue-cta"
         disabled={!prompt.trim()}
-        whileTap={{ scale: 0.96 }}
+        whileTap={{ scale: 0.98 }}
         onClick={handleGenerate}
-        className={`w-full py-4 px-6 rounded-2xl font-bold tracking-wide font-sans shadow-lg flex items-center justify-center gap-2 transition-all duration-300 ${
+        className={`w-full py-3 px-5 rounded-xl font-bold tracking-wide font-sans text-xs flex items-center justify-center gap-2 transition-all duration-300 shrink-0 ${
           prompt.trim()
-            ? "bg-[#C8FF5A] text-black shadow-[0_0_20px_rgba(200,255,90,0.3)] hover:brightness-110 cursor-pointer"
+            ? "bg-[#C8FF5A] text-black shadow-[0_0_15px_rgba(200,255,90,0.25)] hover:brightness-110 cursor-pointer"
             : "bg-white/5 border border-white/5 text-[#A1A1AA]/50 cursor-not-allowed"
         }`}
       >
         <span>Continue</span>
-        <ArrowRight size={18} />
+        <ArrowRight size={14} />
       </motion.button>
 
       {/* Analyzer Divider */}
-      <div className="flex items-center my-6 select-none">
+      <div className="flex items-center my-3 select-none shrink-0 border-white/5">
         <div className="flex-1 h-px bg-white/5" />
-        <span className="px-3 text-[9px] font-mono text-[#555] tracking-widest uppercase">OR STUDY WINNING VIDEOS</span>
+        <span className="px-2 text-[8px] font-mono text-[#555] tracking-widest uppercase">OR STUDY WINNING VIDEOS</span>
         <div className="flex-1 h-px bg-white/5" />
       </div>
 
       {/* Analyze Competitor CTA */}
       <motion.button
         id="home-analyze-creator-cta"
-        whileTap={{ scale: 0.97 }}
+        whileTap={{ scale: 0.98 }}
         onClick={() => {
           window.location.hash = "#/analyze";
         }}
-        className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-[#FF4FD8]/10 to-[#A855F7]/10 border border-[#FF4FD8]/25 text-[#FF4FD8] font-bold tracking-wide font-sans hover:from-[#FF4FD8]/15 hover:to-[#A855F7]/15 transition-all text-xs flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(255,79,216,0.05)] cursor-pointer"
+        className="w-full py-3 px-5 rounded-xl bg-gradient-to-r from-[#FF4FD8]/10 to-[#A855F7]/10 border border-[#FF4FD8]/25 text-[#FF4FD8] font-bold tracking-wide font-sans hover:from-[#FF4FD8]/15 hover:to-[#A855F7]/15 transition-all text-xs flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(255,79,216,0.05)] cursor-pointer shrink-0"
       >
-        <Sparkles size={14} className="text-[#FF4FD8] animate-pulse" />
+        <Sparkles size={12} className="text-[#FF4FD8] animate-pulse" />
         <span>Analyze Creator → Convert To My Style</span>
       </motion.button>
 

@@ -893,7 +893,7 @@ If the prompt is about baking, mindfulness, fitness, relationships, gaming, pers
       <div className="absolute top-10 left-1/3 right-1/4 h-48 bg-gradient-to-b from-[#A855F7]/4 to-transparent blur-3xl pointer-events-none" />
 
       {/* Main Responsive Mobile Frame */}
-      <main className="flex-1 w-full max-w-md mx-auto px-5 pt-8 pb-32 relative flex flex-col justify-between">
+      <main className="flex-1 w-full max-w-md mx-auto px-5 pt-8 pb-24 relative flex flex-col justify-between">
         
         {/* Router transitions animated screen */}
         <div className="flex-1 flex flex-col">

@@ -51,7 +51,7 @@ export default function TypeScreen({
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      className="flex flex-col flex-1 pb-24 font-sans"
+      className="flex flex-col flex-1 pb-4 font-sans"
     >
       {/* Header Controls */}
       <div className="flex items-center justify-between mb-5 text-xs font-mono text-[#A1A1AA]">

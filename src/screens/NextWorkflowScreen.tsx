@@ -430,7 +430,7 @@ export default function NextWorkflowScreen({
       initial={{ opacity: 0, scale: 0.96 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.96 }}
-      className="flex flex-col flex-1 pb-24 relative text-left"
+      className="flex flex-col flex-1 pb-4 relative text-left"
     >
       {/* Header Back Controls */}
       <div className="flex items-center justify-between mb-5">

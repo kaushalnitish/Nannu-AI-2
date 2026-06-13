@@ -40,7 +40,7 @@ export default function LibraryScreen({
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0 }}
-      className="flex flex-col flex-1 pb-24"
+      className="flex flex-col flex-1 pb-4"
     >
       {/* Title */}
       <div className="mb-5 mt-1">

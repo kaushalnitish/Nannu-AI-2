@@ -709,7 +709,7 @@ export default function ScriptScreen({
       initial={{ opacity: 0, scale: 0.96 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.96 }}
-      className="flex flex-col flex-1 pb-24 relative"
+      className="flex flex-col flex-1 pb-4 relative"
     >
       {/* Celebration Confetti */}
       <AnimatePresence>
