@@ -87,8 +87,8 @@ export default function TypeScreen({
       </div>
 
       {/* Grid of Cards */}
-      <div className="flex-1 select-none overflow-y-auto mb-6 pr-1 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
-        <div className="grid grid-cols-1 gap-2.5 max-h-[340px] overflow-y-auto pr-1">
+      <div className="mb-6 select-none">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
           {formats.map((t) => {
             const isActive = selected === t.name;
 

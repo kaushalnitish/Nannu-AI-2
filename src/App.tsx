@@ -44,12 +44,20 @@ import ThumbnailScreen from "./screens/ThumbnailScreen";
 import LibraryScreen from "./screens/LibraryScreen";
 import ProfileScreen from "./screens/ProfileScreen";
 import AnalyzeScreen from "./screens/AnalyzeScreen";
+import CreatorDirectorScreen from "./screens/CreatorDirectorScreen";
 
 export default function App() {
   // Navigation State
   const [currentRoute, setCurrentRoute] = useState<string>("home");
   const [activeTab, setActiveTab] = useState<"home" | "create" | "library" | "profile">("home");
   const [initialProfileSection, setInitialProfileSection] = useState<string | null>(null);
+
+  // Reset window scroll position to top when transitioning between views to prevent scroll inheritance
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTo(0, 0);
+    document.body.scrollTo(0, 0);
+  }, [currentRoute]);
 
   // Accessibility theme state (Dark / Light)
   const [theme, setTheme] = useState<"dark" | "light">(() => {
@@ -748,6 +756,7 @@ If the prompt is about baking, mindfulness, fitness, relationships, gaming, pers
             }}
             onBack={() => navigateTo("create/duration")}
             onNavigateToNext={() => navigateTo("next-workflow")}
+            onOpenCreatorDirector={() => navigateTo("creator-director")}
             onRegenerate={handleRegenerate}
             isRegenerating={isGenerating}
             mood={mood}
@@ -756,6 +765,25 @@ If the prompt is about baking, mindfulness, fitness, relationships, gaming, pers
             duration={duration}
             onEditScriptText={handleEditScriptText}
             prompt={prompt}
+          />
+        );
+      case "creator-director":
+        return (
+          <CreatorDirectorScreen
+            payload={generatedPayload || {
+              script: {
+                hook: { text: "No draft loaded.", action: "" },
+                body: { text: "No draft loaded.", action: "" },
+                cta: { text: "", action: "" }
+              },
+              captions: [],
+              thumbnails: []
+            }}
+            prompt={prompt}
+            mood={mood}
+            contentType={contentType}
+            language={language}
+            onBack={() => navigateTo("script")}
           />
         );
       case "next-workflow":
@@ -865,7 +893,7 @@ If the prompt is about baking, mindfulness, fitness, relationships, gaming, pers
       <div className="absolute top-10 left-1/3 right-1/4 h-48 bg-gradient-to-b from-[#A855F7]/4 to-transparent blur-3xl pointer-events-none" />
 
       {/* Main Responsive Mobile Frame */}
-      <main className="flex-1 w-full max-w-md mx-auto px-5 pt-8 pb-32 relative overflow-hidden flex flex-col justify-between">
+      <main className="flex-1 w-full max-w-md mx-auto px-5 pt-8 pb-32 relative flex flex-col justify-between">
         
         {/* Router transitions animated screen */}
         <div className="flex-1 flex flex-col">

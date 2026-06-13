@@ -90,8 +90,8 @@ export default function ToneScreen({
       </div>
 
       {/* Bento style Tone Selector */}
-      <div className="mb-6 flex-1 select-none overflow-y-auto pr-1">
-        <div className="grid grid-cols-2 gap-2 max-h-[340px] overflow-y-auto pr-1">
+      <div className="mb-6 select-none">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
           {tones.map((t) => {
             const isActive = selected === t.name;
 

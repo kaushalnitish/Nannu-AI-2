@@ -717,7 +717,7 @@ export default function ProfileScreen({
                   <span className="text-[10px] text-zinc-500 font-mono tracking-wide">No diagnostic events logged. Start creating to trigger analytics!</span>
                 </div>
               ) : (
-                <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+                <div className="space-y-2">
                   {analyticsEvents.slice(0, 8).map((ev, index) => {
                     const date = new Date(ev.timestamp);
                     const isErr = ev.event.toLowerCase().includes("fail") || ev.event.toLowerCase().includes("err");

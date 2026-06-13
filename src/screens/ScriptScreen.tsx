@@ -3,6 +3,7 @@ import { Copy, Sparkles, RefreshCw, ChevronLeft, ArrowRight, Eye, ClipboardCheck
 import { motion, AnimatePresence } from "motion/react";
 import { GeneratedScriptPayload } from "../types";
 import GlowCard from "../components/GlowCard";
+import TeleprompterOverlay from "../components/TeleprompterOverlay";
 import { trackCopyAction, trackReadingDuration, trackEditAction, getPreferenceProfileString, logAnalyticsEvent } from "../utils/preferences";
 
 interface Particle {
@@ -21,6 +22,7 @@ interface ScriptScreenProps {
   prompt: string;
   onBack: () => void;
   onNavigateToNext: () => void; // Proceed to post-script hub
+  onOpenCreatorDirector: () => void; // Open the dedicated director screen
   onRegenerate: () => void;
   isRegenerating: boolean;
   mood?: string;
@@ -615,6 +617,7 @@ export default function ScriptScreen({
   prompt,
   onBack,
   onNavigateToNext,
+  onOpenCreatorDirector,
   onRegenerate,
   isRegenerating,
   mood = "Confident 😎",
@@ -626,6 +629,7 @@ export default function ScriptScreen({
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const toastTimeoutRef = useRef<any>(null);
   const [celebrate, setCelebrate] = useState(true);
+  const [showTeleprompter, setShowTeleprompter] = useState(false);
 
   // Helper formatter
   const formatSecondsToDurationStringLocal = (sec: number): string => {
@@ -862,31 +866,61 @@ export default function ScriptScreen({
         />
       </div>
 
-      {/* Dynamic Localized Creator Action Guide */}
-      <CreatorActionGuideDetails
-        prompt={prompt}
-        mood={mood}
-        contentType={contentType}
-        language={language}
-        hookText={payload.script.hook.text}
-        bodyText={payload.script.body.text}
-        ctaText={payload.script.cta.text}
-      />
+      {/* Script Action Center */}
+      <div className="mt-6 p-4 rounded-xl bg-white/[0.02] border border-white/5 space-y-3.5 text-center sm:text-left select-none">
+        <div>
+          <span className="text-[9px] font-mono font-black uppercase text-[#FF4FD8] tracking-widest block">Script Tools</span>
+          <h4 className="text-xs font-bold font-sans text-white tracking-tight mt-0.5 font-sans">Production & Practice Control Panel</h4>
+        </div>
+        
+        <div className="grid grid-cols-2 gap-3 pb-1">
+          {/* Action 1: Start With Teleprompter */}
+          <button
+            onClick={() => setShowTeleprompter(true)}
+            className="flex items-center justify-center gap-2 py-4 px-4 bg-gradient-to-br from-[#111111] to-[#0a0a0a] border border-white/5 hover:border-[#C8FF5A]/30 rounded-2xl text-[10px] font-black font-sans uppercase tracking-wider text-white transition-all duration-300 cursor-pointer active:scale-95 shadow-md"
+          >
+            <Play size={13} className="text-[#C8FF5A] animate-pulse" />
+            <span>Teleprompter</span>
+          </button>
+
+          {/* Action 2: Open Creator Director */}
+          <button
+            onClick={onOpenCreatorDirector}
+            className="flex items-center justify-center gap-2 py-4 px-4 bg-gradient-to-br from-[#111111] to-[#0a0a0a] border border-white/5 hover:border-[#FF4FD8]/30 rounded-2xl text-[10px] font-black font-sans uppercase tracking-wider text-white transition-all duration-300 cursor-pointer active:scale-95 shadow-md"
+          >
+            <Sliders size={13} className="text-[#FF4FD8]" />
+            <span>Director Mode</span>
+          </button>
+        </div>
+      </div>
 
       {/* The Requested NEXT Workflow Proceed Trigger */}
-      <div className="mt-6">
+      <div className="mt-4">
         <motion.button
           whileTap={{ scale: 0.98 }}
           onClick={() => {
             logAnalyticsEvent("Navigated to creator action hub", { prompt, mood, contentType });
             onNavigateToNext();
           }}
-          className="w-full py-4.5 px-6 rounded-2xl bg-[#C8FF5A] hover:brightness-110 active:scale-95 text-black font-black text-sm uppercase font-sans tracking-widest shadow-[0_0_30px_rgba(200,255,90,0.35)] hover:shadow-[0_0_40px_rgba(200,255,90,0.55)] cursor-pointer flex items-center justify-center gap-2.5 border border-black/10 transition-all font-mono"
+          className="w-full py-4 px-6 rounded-2xl bg-[#C8FF5A] hover:brightness-110 active:scale-95 text-black font-black text-xs uppercase font-sans tracking-widest shadow-[0_0_30px_rgba(200,255,90,0.25)] hover:shadow-[0_0_40px_rgba(200,255,90,0.45)] cursor-pointer flex items-center justify-center gap-2.5 border border-black/10 transition-all font-mono"
         >
           <span>PROCEED TO CREATOR HUB</span>
           <ArrowRight size={18} />
         </motion.button>
       </div>
+
+      {/* Teleprompter practices panel overlay */}
+      <AnimatePresence>
+        {showTeleprompter && (
+          <TeleprompterOverlay
+            hook={payload.script.hook.text}
+            body={payload.script.body.text}
+            cta={payload.script.cta.text}
+            title={prompt || "My Viral Creation"}
+            onClose={() => setShowTeleprompter(false)}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Custom Notification Toast */}
       <AnimatePresence>
