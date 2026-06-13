@@ -26,6 +26,7 @@ interface ScriptScreenProps {
   mood?: string;
   contentType?: string;
   language?: string;
+  duration?: string;
   onEditScriptText?: (tab: "hook" | "body" | "cta", newText: string) => void;
 }
 
@@ -619,11 +620,32 @@ export default function ScriptScreen({
   mood = "Confident 😎",
   contentType = "Talking Head",
   language = "English",
+  duration = "45 sec",
   onEditScriptText
 }: ScriptScreenProps) {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const toastTimeoutRef = useRef<any>(null);
   const [celebrate, setCelebrate] = useState(true);
+
+  // Helper formatter
+  const formatSecondsToDurationStringLocal = (sec: number): string => {
+    if (sec < 60) {
+      return `${sec} sec`;
+    }
+    const mins = Math.floor(sec / 60);
+    const leftSecs = sec % 60;
+    if (leftSecs === 0) {
+      return `${mins} min`;
+    }
+    return `${mins}m ${leftSecs.toString().padStart(2, "0")}s`;
+  };
+
+  // Live word-count-based Speaking Time calculation
+  const estSpeakingTimeSeconds = useMemo(() => {
+    const combinedText = `${payload.script.hook.text} ${payload.script.body.text} ${payload.script.cta.text}`;
+    const wordCount = combinedText.trim().split(/\s+/).filter(Boolean).length;
+    return Math.max(1, Math.round(wordCount / 2.35));
+  }, [payload.script.hook.text, payload.script.body.text, payload.script.cta.text]);
 
   const showToast = (message: string) => {
     if (toastTimeoutRef.current) {
@@ -761,6 +783,32 @@ export default function ScriptScreen({
           <p className="text-xs text-[#A1A1AA] font-sans">
             Refine your continuous script layout, then proceed to the Creator Hub dashboard.
           </p>
+        </div>
+      </div>
+
+      {/* Duration Accuracy Validation HUD Card */}
+      <div className="grid grid-cols-2 gap-4 mb-6 select-none">
+        <div className="p-4 bg-gradient-to-br from-[#111111] to-[#0a0a0a] border border-white/5 rounded-2xl flex flex-col justify-between text-left">
+          <span className="text-[9px] font-mono text-[#A1A1AA] uppercase tracking-widest block mb-1">
+            ⏱️ Selected Duration
+          </span>
+          <span className="text-xs font-mono font-black text-white hover:text-[#C8FF5A] transition-colors uppercase">
+            {duration}
+          </span>
+        </div>
+        
+        <div className="p-4 bg-gradient-to-br from-[#111111] to-[#0a0a0a] border border-white/5 rounded-2xl flex flex-col justify-between text-left">
+          <span className="text-[9px] font-mono text-[#A1A1AA] uppercase tracking-widest block mb-1">
+            🗣️ Estimated Speaking Time
+          </span>
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className="text-xs font-mono font-black text-[#C8FF5A] uppercase">
+              {formatSecondsToDurationStringLocal(estSpeakingTimeSeconds)}
+            </span>
+            <span className="text-[8px] font-mono px-1.5 py-0.5 rounded bg-[#C8FF5A]/10 text-[#C8FF5A] border border-[#C8FF5A]/30 shrink-0 font-bold">
+              ±10% Target
+            </span>
+          </div>
         </div>
       </div>
 

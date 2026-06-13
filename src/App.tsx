@@ -171,7 +171,47 @@ export default function App() {
 
   // Scroll to top on route change via Hash navigation
   useEffect(() => {
-    window.scrollTo(0, 0);
+    const performScrollReset = () => {
+      try {
+        window.scrollTo({
+          top: 0,
+          left: 0,
+          behavior: "instant" as any
+        });
+        document.documentElement.scrollTo({
+          top: 0,
+          left: 0,
+          behavior: "instant" as any
+        });
+        document.body.scrollTo({
+          top: 0,
+          left: 0,
+          behavior: "instant" as any
+        });
+      } catch (e) {
+        // Fallback for older browsers
+        window.scrollTo(0, 0);
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+      }
+    };
+
+    // 1. Reset immediately
+    performScrollReset();
+
+    // 2. Schedule progressive resets during transition states (0ms - 300ms)
+    // This solves issues with Framer Motion AnimatePresence exit height retention and mobile viewport rendering lag
+    const timer50 = setTimeout(performScrollReset, 50);
+    const timer150 = setTimeout(performScrollReset, 150);
+    const timer250 = setTimeout(performScrollReset, 250);
+    const timer350 = setTimeout(performScrollReset, 350);
+
+    return () => {
+      clearTimeout(timer50);
+      clearTimeout(timer150);
+      clearTimeout(timer250);
+      clearTimeout(timer350);
+    };
   }, [currentRoute]);
 
   const navigateTo = (route: string) => {
@@ -713,6 +753,7 @@ If the prompt is about baking, mindfulness, fitness, relationships, gaming, pers
             mood={mood}
             contentType={contentType}
             language={language}
+            duration={duration}
             onEditScriptText={handleEditScriptText}
             prompt={prompt}
           />

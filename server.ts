@@ -940,155 +940,100 @@ app.post("/api/convert-to-my-style", async (req, res, next) => {
       `My customized take on a viral creator concept. 🤫 Ready to clone my voice settings? Drop a comment below.`
     ],
     thumbnails: [
-      { title: `Cloned Style: ${cleanTopic}`, description: "Sleek slate dark card highlighting the transformed topic with a luxury typography layout." },
-      { title: `🤫 My Way of ${cleanTopic}`, description: "Translucent glass container on neon purple space, bold and high-retention graphic style." },
-      { title: `The Transformed Blueprint`, description: "Clean Apple-inspired design board showing the step-by-step conversion matrix." }
+      { title: `Cloned Style: ${cleanTopic}`, description: "Sleek slate dark card highlighting the transformed topic with a luxury aesthetic." }
     ]
   };
 
-  setTimeout(() => {
-    try {
-      res.json(mockTransformation);
-    } catch (timeoutErr) {
-      next(timeoutErr);
-    }
-  }, 1000);
-  } catch (err) {
-    next(err);
-  }
-});
-
-// POST /api/generate-guide
-app.post("/api/generate-guide", async (req, res, next) => {
-  try {
-    const { hook, body, cta, language, contentType, mood, prompt } = req.body;
-    
-    console.log("GENERATING DYNAMIC CREATOR GUIDE WITH PARAMETERS:", { language, contentType, mood, prompt });
-
-    const systemInstruction = `
-      You are Nannu AI, a world-class production director, content coach, and video strategist.
-      Your task is to analyze a short-form video script (containing Hook, Body, CTA) and generate a custom, highly practical 6-step Creator Action Guide in the target language.
-      
-      Target Language / Dialect: ${language || "English"} 
-      (CRITICAL language styling:
-       - If language is "Hindi", write the entire guide - titles, descriptions, and bullets - in beautiful Devanagari Hindi.
-       - If language is "Hinglish", write them in romanized Hinglish blend like 'Face par aisi key-light setup karo jo professional premium look de...'.
-       - If "English", write in modern professional English).
-      
-      You must return a raw JSON object containing a "guide" array of exactly 6 action blocks corresponding precisely to:
-      1. Camera Setup
-      2. Acting & Delivery
-      3. Scene Suggestions
-      4. B-Roll Ideas
-      5. Editing Suggestions
-      6. Retention Tips
-      
-      Each block in the "guide" array must have:
-      - "title": string (the Title of the section, localized e.g. "१. कैमरा सेटअप" or "1. Camera Setup" depending on target language)
-      - "description": string (the core coaching directive tailored specifically to these script lines and the topic: "${prompt || ""}")
-      - "bullets": array of exactly 3 strings (actionable in-studio checkmarks, direct and professional)
-      
-      Ensure your instructions are highly customized to the actual script provided, referring to elements of the text where fitting. Avoid generic placeholder advice.
-      Do not return markdown wrappers like \`\`\`json. Return only standard raw JSON.
-    `;
-    
-    const contents = `
-      Script payload to analyze:
-      Hook: "${hook}"
-      Body: "${body}"
-      CTA: "${cta}"
-      
-      Content Format: "${contentType || "Talking Head"}"
-      Vibe / Mood: "${mood || "Confident"}"
-    `;
-    
-    let client: GoogleGenAI | null = null;
-    try {
-      client = getGeminiClient();
-    } catch (e) {
-      console.warn("Gemini Client bypassed for guide generation.");
-    }
-    
-    if (client) {
-      console.log("[Dynamic Guide Engine] Consulting Gemini for dynamic playbook creation...");
-      const response = await generateContentWithFallback(client, {
-        contents,
-        config: {
-          systemInstruction,
-          responseMimeType: "application/json",
-          temperature: 0.85
-        }
-      });
-      if (response && response.text) {
-        return res.json(JSON.parse(response.text.trim()));
-      }
-    }
-    
-    throw new Error("No client or empty response from model pool");
-  } catch (err: any) {
-    console.error("AI dynamic guide generation failed, signaling client to fallback:", err);
-    res.json({ isFallback: true });
+  res.json(mockTransformation);
+  } catch (routeErr: any) {
+    next(routeErr);
   }
 });
 
 // POST /api/generate-thumbnail-prompts
 app.post("/api/generate-thumbnail-prompts", async (req, res, next) => {
   try {
-    const { hook, body, cta, instructions, images } = req.body;
+    const { hook, body, cta, instructions, images, aspectRatios, platforms, language } = req.body;
     
-    console.log("GENERATING ADVANCED THUMBNAIL PROMPTS:", { 
+    // Default selected aspect ratios if not supplied (convert platforms to ratios if needed)
+    let selectedRatios: string[] = ["16:9"];
+    if (aspectRatios && Array.isArray(aspectRatios) && aspectRatios.length > 0) {
+      selectedRatios = aspectRatios;
+    } else if (platforms && Array.isArray(platforms) && platforms.length > 0) {
+      selectedRatios = platforms.map(p => {
+        if (p.includes("YouTube") || p.includes("16:9")) return "16:9";
+        if (p.includes("Instagram") || p.includes("9:16")) return "9:16";
+        if (p.includes("LinkedIn") || p.includes("1:1")) return "1:1";
+        if (p.includes("4:5")) return "4:5";
+        return "16:9";
+      });
+    }
+
+    const activeLanguage = language || "English";
+
+    console.log("GENERATING SCENE-SPECIFIC STRATEGIST THUMBNAIL PROMPTS:", { 
       scriptLength: (hook?.length || 0) + (body?.length || 0), 
       instructions, 
-      uploadedImagesCount: images?.length || 0 
+      uploadedImagesCount: images?.length || 0,
+      selectedRatios,
+      activeLanguage
     });
 
     const systemInstruction = `
-      You are Nannu AI, an elite visual designer and seasoned thumbnail strategist.
-      Your task is to analyze the videographer's script, user instructions, and optional reference images to generate 3 high-quality, high-retention thumbnail concepts and prompt sets.
-      
-      Do NOT generate the actual images. Generate ONLY deep prompt blocks.
-      
-      For each of the 3 proposals, you MUST provide exactly:
-      - "title": string (the visual text overlay or tagline for this proposal written in the target script language)
-      - "concept": string (overall visual concept/vibe)
-      - "composition": string (camera lens angle, focal placement of subject, framing rule of thirds details)
-      - "expression": string (face expressions, emotional state of model)
-      - "lighting": string (lighting warmth, shadows direction, neon glow details)
-      - "textOverlay": string (suggested overlay text font placement and colors)
-      - "imagePrompt": string (a highly detailed, professional descriptive image generator prompt designed for Midjourney v6/Imagen 3 to produce this background/vibe)
-      
-      Look closely at any provided reference images to extract subjects, art styles, human likenesses, clothing colors, and background details to maintain strict stylistic continuity!
-      
-      You must respond with exactly a raw JSON structure:
+      You are Nannu AI, a world-class YouTube Thumbnail Strategist and SaaS Creative Director. 
+      Your task is to design exactly 3 distinct, high-converting thumbnail visual options for each of the selected aspect ratios: ${selectedRatios.join(", ")}.
+
+      Do NOT generate generic art-style prompts or buzzwords (e.g., "8k hyperrealism", "futuristic metallic backplates", "sleek creator studio"). 
+      Instead, generate SCENE-SPECIFIC prompts that read like a professional photography set instruction, fusing these 10 elements into a single fluid, natural-language, highly detailed English prompt:
+      1. Subject: specific age, clean facial structures, premium athletic apparel, smart posture.
+      2. Facial Expression: vivid micro-expression (e.g. intense calculated grin, wide-eyed astonishment, raised-eyebrow disbelief, severe warning grimace).
+      3. Eye Contact: direct lens-locking eye contact or sharp directed side glance.
+      4. Body Language: powerful hand gestures (e.g., pointing with warning finger, folding arms of extreme confidence, showing a glowing mobile phone screen).
+      5. Camera Angle: camera positioning (e.g., eye-level macro, low-angle hero shot, close-up with shallow depth).
+      6. Composition: precise placement (e.g., "aligned on the far-right side, leaving the left 65% of the frame completely open as cinematic negative space designed for massive text overlays").
+      7. Background: specific, rich contextual background (e.g., a dark dimly-lit corporate boardroom with venetian blind shadow lines, a modern coding studio with soft blue server rack LEDs, or raw concrete loft with warm window light shafts).
+      8. Lighting: advanced studio lighting (e.g. sharp teal key light, cinematic warm yellow rim highlight defining hair and silhouette, soft shadows).
+      9. Emotional Trigger: extreme curiosity, absolute authority, subtle fear, shock, status, or high-end luxury.
+      10. Thumbnail Goal: optimized to trigger instant clicks on a noisy visual feed.
+
+      Append the correct Midjourney/Flux aspect ratio suffix at the end of the 'imagePrompt' (e.g. "--ar 16:9", "--ar 9:16", "--ar 1:1" or "--ar 4:5").
+
+      CRITICAL DIALECT & LANGUAGE CONSISTENCY:
+      The user's selected language is: ${activeLanguage}.
+      The 'title' (suggested text overlay) and 'concept' (short layout idea description) MUST be written in the selected language:
+      - If "English": write them in clear, high-impact English.
+      - If "Hindi": write them in professional Hindi using beautiful Devanagari script.
+      - If "Hinglish": write them in Romanized mixed Hindi-English (e.g., 'Warning look ke sath camera me dekhta hua, left side me bold text overlay area ke sath').
+
+      NOTE: The 'imagePrompt' and 'negativePrompt' MUST ALWAYS be written in highly detailed English for AI generators.
+
+      For each selected aspect ratio, you must output exactly 3 distinct options (optionIndex: 1, 2, and 3). Return a raw JSON object matching this schema:
       {
         "prompts": [
           {
-            "title": "...",
-            "concept": "...",
-            "composition": "...",
-            "expression": "...",
-            "lighting": "...",
-            "textOverlay": "...",
-            "imagePrompt": "..."
-          },
-          ...
+            "platform": "LABEL_STRING", // Use a beautifully formatted label based on ratio, e.g. "16:9 (YouTube Thumbnail)", "9:16 (Shorts & Reels)", "1:1 (Instagram & LinkedIn)", "4:5 (Social Feed Portrait)"
+            "optionIndex": 1,
+            "title": "TEXT_OVERLAY_SUGGESTION",
+            "concept": "CORE_CONCEPT_SHORT_SUMMARY",
+            "negativePrompt": "EXCLUSION_LIST_IN_ENGLISH", // e.g. "blurry, generic logo, watermarks, text overlay, extra fingers",
+            "imagePrompt": "DETAILED_STRATEGIST_PROMPT_IN_ENGLISH" // Detailed scene description ending with the --ar ratio suffix
+          }
         ]
       }
-      
-      Do not return markdown wrappers. Return only standard raw JSON.
     `;
-    
+
     let contentPrompt = `
-      Create 3 custom high-retention visual thumbnail prompts based on this short-form script:
-      Hook: "${hook}"
-      Body: "${body}"
-      CTA: "${cta}"
+      Create exactly 3 custom premium visual options for these ratios: ${selectedRatios.join(", ")}.
+      Script Hook: "${hook || ""}"
+      Script Body: "${body || ""}"
+      Script CTA: "${cta || ""}"
       
-      Additional user style guidelines/requests: "${instructions || "None"}"
+      Additional user creative instructions / notes: "${instructions || "None"}"
+      Keep the language strictly matched to: "${activeLanguage}".
     `;
-    
+
     const parts: any[] = [{ text: contentPrompt }];
-    
+
     // Convert and append reference images if any
     if (images && Array.isArray(images)) {
       for (let i = 0; i < images.length; i++) {
@@ -1104,14 +1049,14 @@ app.post("/api/generate-thumbnail-prompts", async (req, res, next) => {
         }
       }
     }
-    
+
     let client: GoogleGenAI | null = null;
     try {
       client = getGeminiClient();
     } catch (e) {
       console.warn("Gemini client bypassed during prompt architecting.");
     }
-    
+
     if (client) {
       console.log(`[Thumbnail Prompts Engine] Launching Gemini-3.5 with ${images?.length || 0} images...`);
       const response = await client.models.generateContent({
@@ -1120,7 +1065,7 @@ app.post("/api/generate-thumbnail-prompts", async (req, res, next) => {
         config: {
           systemInstruction,
           responseMimeType: "application/json",
-          temperature: 0.8
+          temperature: 0.85
         }
       });
       
@@ -1132,38 +1077,97 @@ app.post("/api/generate-thumbnail-prompts", async (req, res, next) => {
     throw new Error("API Client unavailable or empty content response.");
   } catch (err: any) {
     console.error("Advanced prompt generation failed, returning high-end local fallbacks:", err);
-    const fallbackPrompts = {
-      prompts: [
-        {
-          title: "The Ultimate Script Twist",
-          concept: "Dark glowing slate environment, split frame showing a dramatic breakthrough light",
-          composition: "Medium close shot, subject positioned in center-left, background slightly out of focus",
-          expression: "Intense, direct eyes locking onto camera, slight knowing smirk",
-          lighting: "Cyberpunk high-contrast yellow key light, soft purple ambient backdrop",
-          textOverlay: "BOLD yellow font at the bottom: 'THIS CHANGED EVERYTHING' with drop shadow",
-          imagePrompt: "A high-end cinematic talking-head setup, modern slate aesthetic, glowing led tubes in background, bokeh, photorealistic, 8k resolution"
-        },
-        {
-          title: "The Secret Formula Excluded",
-          concept: "Neon violet space, floating golden blueprint diagram behind a transparent glass display",
-          composition: "Rule of thirds, subject on the right looking towards the floating diagram on the left",
-          expression: "Shocked, eyes wide open pointing at the screen in amazement",
-          lighting: "Dramatic cool-white face lighting, saturated purple glowing rim lighting",
-          textOverlay: "Clean white sans font on top: 'SECRET UNLOCKED' with bright glowing outlines",
-          imagePrompt: "A professional creator holding a transparent glowing futuristic tablet, neon purple reflections, depth of field, high-end production value"
-        },
-        {
-          title: "Stop Overcomplicating Visuals",
-          concept: "Minimalist Apple-style concrete wall with a single giant orange warning label",
-          composition: "Wide angle, centered concrete column with bold visual graphics",
-          expression: "Determined, powerful facial structures looking forward with serious focus",
-          lighting: "Crisp natural daylight casting deep geometric shadows across raw industrial concrete",
-          textOverlay: "Sleek sans serif text overlay: 'STOP COMMUNICATING LAZY' framed in an orange border",
-          imagePrompt: "A clean modern architectural concrete wall, minimalist design style, dynamic bright summer morning lighting, shadows, ultra realistic, fashion photography"
+    
+    // Retrieve input values for fallbacks
+    const { hook, instructions, aspectRatios, platforms, language } = req.body;
+    let selectedRatios: string[] = ["16:9"];
+    if (aspectRatios && Array.isArray(aspectRatios) && aspectRatios.length > 0) {
+      selectedRatios = aspectRatios;
+    } else if (platforms && Array.isArray(platforms) && platforms.length > 0) {
+      selectedRatios = platforms.map(p => {
+        if (p.includes("YouTube") || p.includes("16:9")) return "16:9";
+        if (p.includes("Instagram") || p.includes("9:16")) return "9:16";
+        if (p.includes("LinkedIn") || p.includes("1:1")) return "1:1";
+        if (p.includes("4:5")) return "4:5";
+        return "16:9";
+      });
+    }
+
+    const activeLanguage = language || "English";
+    const shortText = hook ? (hook.length < 35 ? hook : hook.slice(0, 32) + "...") : "Ultimate Reveal";
+    const extraInstructions = instructions ? `Guidelines: ${instructions}.` : "";
+
+    const localPrompts: any[] = [];
+    
+    selectedRatios.forEach((ratio: string) => {
+      let ratioLabel = "16:9 (YouTube Thumbnail)";
+      if (ratio === "9:16") ratioLabel = "9:16 (Shorts & Reels)";
+      if (ratio === "1:1") ratioLabel = "1:1 (Instagram & LinkedIn)";
+      if (ratio === "4:5") ratioLabel = "4:5 (Social Feed Portrait)";
+
+      [1, 2, 3].forEach((optIdx: number) => {
+        let title = "";
+        let concept = "";
+        let negativePrompt = "blurry, graphic text-overlays, watermark logos, low resolution, deformed face, bad hands, extra limbs, fake look, oversaturated colors";
+        let imagePrompt = "";
+
+        if (activeLanguage === "Hindi") {
+          if (optIdx === 1) {
+            title = `"${shortText}" का वायरल सच`;
+            concept = `दाहिनी ओर खड़ा चकित विषय, बाईं ओर पर्याप्त खाली स्पेस के साथ। ${extraInstructions}`;
+            imagePrompt = `A confident twenty-something creator in a sharp charcoal hoodie, standing on the right side of the frame with a wide-eyed shocked expression, index finger pointing dynamically toward bold imaginary words on the left. The background is a dimly-lit high-tech creator studio with soft violet rim lighting on their silhouette. Shallow depth of field, cinematic photography --ar ${ratio}`;
+          } else if (optIdx === 2) {
+            title = `ये सेटिंग बंद करो!`;
+            concept = `एक गंभीर चेतावनी देने वाला आत्मविश्वास पूर्ण लेआउट। ${extraInstructions}`;
+            imagePrompt = `An authoritative professional creator looked directly at the lens with a stern expression and raised eyebrow, hand raised in a stopping gesture, seated behind a modern dark wooden desk. A dark minimal workspace background with strong amber backlight reflections casting linear window shadows. High contrast, warm key light, photorealistic portraiture --ar ${ratio}`;
+          } else {
+            title = `Nannu AI का सीक्रेट ब्ल्यूप्रिंट`;
+            concept = `क्लासी लक्जरी स्टाइल वाला मिनिमलिस्ट लेआउट। ${extraInstructions}`;
+            imagePrompt = `A relaxed young professional seated on the right side of the frame, smiling with warm calm confidence, direct eye contact with the camera. Clear beige concrete loft studio setup with soft natural window sunbeams casting leaf shadows. Cinematic light, elegant atmosphere, natural color palettes --ar ${ratio}`;
+          }
+        } else if (activeLanguage === "Hinglish") {
+          if (optIdx === 1) {
+            title = `Stop "${shortText}" Mistakes!`;
+            concept = `Shocked expression ke sath, right side par subject, left me massive negative space details. ${extraInstructions}`;
+            imagePrompt = `A motivated male creator in a premium black crewneck, aligned on the right of the frame, eyes wide with teeth grit in high amazement, pointing directly to the empty left side designed for visual overlays. Dark industrial cyber studio background with neon blue and cyan rim lighting creating an electric contour. High contrast, clean features, 85mm portrait --ar ${ratio}`;
+          } else if (optIdx === 2) {
+            title = `🤫 Secrets of "${shortText}"`;
+            concept = `Mysterious smirk, holding a blank card or phone toward the camera. ${extraInstructions}`;
+            imagePrompt = `A focused thirty-year-old creator smiling with a clever side-glance, holding a smartphone showing a glowing screen directly towards the viewer. Moody atmospheric creator cellar with neon purple strip bars reflecting in background. Warm low-key light from below, dramatic cinematic mood --ar ${ratio}`;
+          } else {
+            title = `Build ${shortText} in 1 Click`;
+            concept = `Clean high-end SaaS theme page, warm and highly trustworthy. ${extraInstructions}`;
+            imagePrompt = `An approachable female entrepreneur standing, arms crossed, leaning slightly forward with a confident open-mouth smile. Premium minimalist office background with soft daylight pouring through large glass windows casting geometric shadows on a white plaster wall. Luxury aesthetic, soft shadows, masterfully polished --ar ${ratio}`;
+          }
+        } else {
+          // English (Default)
+          if (optIdx === 1) {
+            title = `The Ultimate "${shortText}" Secrets`;
+            concept = `Confident look with shocked pointing toward extreme negative space. ${extraInstructions}`;
+            imagePrompt = `A charismatic young creator standing at the far-right margins of the shot with a sudden jaw-drop shocked expression, looking directly into the camera while pointing dynamically to the flat dark left 65% of the frame. The background features a dark obsidian slate studio wall with subtle red LED lightbars. High-contrast key lighting, realistic skin textures, cinematic depth --ar ${ratio}`;
+          } else if (optIdx === 2) {
+            title = `Never Do This!`;
+            concept = `Serious stopping pose, high authority. ${extraInstructions}`;
+            imagePrompt = `A serious entrepreneur holding up a flat palm toward the camera lens in a definitive stopping gesture, face showing intense warning warning. Medium close-up, sharp studio focus, warm orange backlight contouring their shoulders against a clean dark grey plaster wall. Cinematic volume fog, dramatic studio portraiture --ar ${ratio}`;
+          } else {
+            title = `The Clean 5-Step Blueprint`;
+            concept = `Elegantly relaxed look, ideal for trust and luxury feel. ${extraInstructions}`;
+            imagePrompt = `A professional creator leaning forward with an authentic calm smile, looking directly forward. Elegant minimalist catalog styled setup with soft warm afternoon sunrays shining through venetian blinds, creating delicate horizontal shadow lines on a textured beige wall. High key lighting, editorial aesthetic, raw textures --ar ${ratio}`;
+          }
         }
-      ]
-    };
-    res.json(fallbackPrompts);
+
+        localPrompts.push({
+          platform: ratioLabel,
+          optionIndex: optIdx,
+          title,
+          concept,
+          negativePrompt,
+          imagePrompt
+        });
+      });
+    });
+
+    res.json({ prompts: localPrompts, isFallback: true });
   }
 });
 
