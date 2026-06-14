@@ -1299,7 +1299,7 @@ export default function ProfileScreen({
                 <BarChart3 className="mx-auto text-[#A1A1AA] mb-2" size={24} />
                 <h4 className="text-xs font-bold text-white mb-1 uppercase tracking-wide">No Analytics Logged Yet</h4>
                 <p className="text-[10px] text-[#A1A1AA] max-w-[220px] mx-auto leading-relaxed">
-                  Start generating your custom script or practicing with the live teleprompter to see real-time statistics here.
+                  Start generating your custom script or saving drafts to see real-time statistics here.
                 </p>
               </div>
             ) : (

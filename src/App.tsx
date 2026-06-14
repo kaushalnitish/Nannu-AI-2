@@ -40,7 +40,6 @@ import GeneratingScreen from "./screens/GeneratingScreen";
 import ScriptScreen from "./screens/ScriptScreen";
 import NextWorkflowScreen from "./screens/NextWorkflowScreen";
 import CaptionScreen from "./screens/CaptionScreen";
-import ThumbnailScreen from "./screens/ThumbnailScreen";
 import LibraryScreen from "./screens/LibraryScreen";
 import ProfileScreen from "./screens/ProfileScreen";
 import AnalyzeScreen from "./screens/AnalyzeScreen";
@@ -161,7 +160,7 @@ export default function App() {
       } else if (route === "voice") {
         setActiveTab("profile"); // Train My Voice belongs in Profile zone
         setInitialProfileSection("train");
-      } else if (route === "generating" || route === "script" || route === "caption" || route === "thumbnails") {
+      } else if (route === "generating" || route === "script" || route === "caption") {
         // Keeps create tab active while generating final script outputs
         setActiveTab("create");
       }
@@ -824,16 +823,7 @@ If the prompt is about baking, mindfulness, fitness, relationships, gaming, pers
             contentType={contentType}
           />
         );
-      case "thumbnails":
-        return (
-          <ThumbnailScreen
-            thumbnails={generatedPayload?.thumbnails || []}
-            onBack={() => navigateTo("script")}
-            prompt={prompt}
-            mood={mood}
-            contentType={contentType}
-          />
-        );
+
       case "library":
         return (
           <LibraryScreen

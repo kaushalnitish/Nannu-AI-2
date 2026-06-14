@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { Brain, Sparkles, Check, Play, User, MessageSquare, Image as ImageIcon } from "lucide-react";
+import { Brain, Sparkles, Check, Play, User, MessageSquare } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
 interface GeneratingScreenProps {
@@ -71,10 +71,9 @@ export default function GeneratingScreen({ isGenerating = true, payloadReady = f
   const checklist = [
     { label: "Generating Hook...", percent: 20, icon: Sparkles },
     { label: "Generating Main Script...", percent: 45, icon: Play },
-    { label: "Generating CTA...", percent: 65, icon: Brain },
-    { label: "Generating Creator Directions...", percent: 80, icon: User },
-    { label: "Generating Captions...", percent: 92, icon: MessageSquare },
-    { label: "Generating Thumbnails...", percent: 100, icon: ImageIcon },
+    { label: "Generating CTA...", percent: 68, icon: Brain },
+    { label: "Generating Creator Directions...", percent: 85, icon: User },
+    { label: "Generating Captions...", percent: 100, icon: MessageSquare },
   ];
 
   return (

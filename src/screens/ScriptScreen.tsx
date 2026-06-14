@@ -3,7 +3,6 @@ import { Copy, Sparkles, RefreshCw, ChevronLeft, ArrowRight, Eye, ClipboardCheck
 import { motion, AnimatePresence } from "motion/react";
 import { GeneratedScriptPayload } from "../types";
 import GlowCard from "../components/GlowCard";
-import TeleprompterOverlay from "../components/TeleprompterOverlay";
 import { trackCopyAction, trackReadingDuration, trackEditAction, getPreferenceProfileString, logAnalyticsEvent } from "../utils/preferences";
 
 interface Particle {
@@ -629,7 +628,6 @@ export default function ScriptScreen({
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const toastTimeoutRef = useRef<any>(null);
   const [celebrate, setCelebrate] = useState(true);
-  const [showTeleprompter, setShowTeleprompter] = useState(false);
 
   // Helper formatter
   const formatSecondsToDurationStringLocal = (sec: number): string => {
@@ -873,17 +871,8 @@ export default function ScriptScreen({
           <h4 className="text-xs font-bold font-sans text-white tracking-tight mt-0.5 font-sans">Production & Practice Control Panel</h4>
         </div>
         
-        <div className="grid grid-cols-2 gap-3 pb-1">
-          {/* Action 1: Start With Teleprompter */}
-          <button
-            onClick={() => setShowTeleprompter(true)}
-            className="flex items-center justify-center gap-2 py-4 px-4 bg-gradient-to-br from-[#111111] to-[#0a0a0a] border border-white/5 hover:border-[#C8FF5A]/30 rounded-2xl text-[10px] font-black font-sans uppercase tracking-wider text-white transition-all duration-300 cursor-pointer active:scale-95 shadow-md"
-          >
-            <Play size={13} className="text-[#C8FF5A] animate-pulse" />
-            <span>Teleprompter</span>
-          </button>
-
-          {/* Action 2: Open Creator Director */}
+        <div className="grid grid-cols-1 pb-1">
+          {/* Action: Open Creator Director */}
           <button
             onClick={onOpenCreatorDirector}
             className="flex items-center justify-center gap-2 py-4 px-4 bg-gradient-to-br from-[#111111] to-[#0a0a0a] border border-white/5 hover:border-[#FF4FD8]/30 rounded-2xl text-[10px] font-black font-sans uppercase tracking-wider text-white transition-all duration-300 cursor-pointer active:scale-95 shadow-md"
@@ -909,18 +898,7 @@ export default function ScriptScreen({
         </motion.button>
       </div>
 
-      {/* Teleprompter practices panel overlay */}
-      <AnimatePresence>
-        {showTeleprompter && (
-          <TeleprompterOverlay
-            hook={payload.script.hook.text}
-            body={payload.script.body.text}
-            cta={payload.script.cta.text}
-            title={prompt || "My Viral Creation"}
-            onClose={() => setShowTeleprompter(false)}
-          />
-        )}
-      </AnimatePresence>
+
 
       {/* Custom Notification Toast */}
       <AnimatePresence>
