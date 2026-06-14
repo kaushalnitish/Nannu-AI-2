@@ -209,7 +209,7 @@ app.post("/api/generate", async (req, res, next) => {
     - Language / Dialect: ${language || "English"} (CRITICAL: If the language is "Hindi", write the spoken content and captions in beautiful Devanagari Hindi script. If the language is "Hinglish", write the spoken content and captions in romanized blended English-Hindi like 'Bro, agar aap content post kar rahe ho...'. If "English", use authentic modern English).
     - Mood: ${mood || "Confident"}
     - Duration: ${duration || "45 sec"}
-    - Content Type: ${contentType || "Talking Head"}
+    - Content Type: ${contentType || "Talking Head"} (CRITICAL: You MUST automatically decide whether the script should internally weave in storytelling, authority building, POV, educational framing, case study structures, list styles, or viral hooks depending on the prompt's context to maximize high-pacing retention, without mentioning these advanced structural labels directly).
     - Tone Multiplier: Voice Trained Match is ${voiceMultiplier || 92}%.
     - Phrasing Vocabulary: ${resolvedVocabulary}. (CRITICAL: If "Personal Storytelling", tell an authentic, raw first-person emotional story inside the theme of the prompt, with relatable setbacks and triumph elements).
     - Speech Tones Blend: ${resolvedTones}. (CRITICAL: You MUST blend these requested tones like funny, dark humour, excited, friendly, brutal, calm etc. in the spoken script text, reflecting the chosen characteristics/vibe).

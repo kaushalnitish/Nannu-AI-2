@@ -6,7 +6,11 @@
 import { useState, useEffect } from "react";
 import { Header } from "react"; // Actually we can write custom layouts directly
 import { motion, AnimatePresence } from "motion/react";
-import { Brain, Heart, Layers, Sparkles, UserCircle } from "lucide-react";
+import { Brain, Heart, Layers, Sparkles, UserCircle, LogOut } from "lucide-react";
+import { useAuth } from "./lib/authContext";
+import AuthGuard from "./components/AuthGuard";
+import { collection, getDocs, doc, setDoc, deleteDoc } from "firebase/firestore";
+import { db } from "./lib/firebase";
 
 import { GeneratedScriptPayload, LibraryItem, VoiceSettings } from "./types";
 import {
@@ -126,6 +130,8 @@ export default function App() {
     }
   }, [generatedPayload]);
 
+  const { user, userProfile, syncProfileData, signOutUser } = useAuth();
+
   // Persistence States
   const [libraryList, setLibraryList] = useState<LibraryItem[]>([]);
   const [voiceSettings, setVoiceSettings] = useState<VoiceSettings>({
@@ -135,11 +141,36 @@ export default function App() {
     lastTrained: "4 hours ago"
   });
 
-  // Load persistence records
+  // Load persistence records & Sync with Firestore from login dynamically
   useEffect(() => {
-    setLibraryList(getSavedLibrary());
-    setVoiceSettings(getSavedVoiceSettings());
-  }, []);
+    async function loadUserData() {
+      if (user) {
+        try {
+          const querySnapshot = await getDocs(collection(db, "users", user.uid, "library"));
+          const items: LibraryItem[] = [];
+          querySnapshot.forEach((docSnap) => {
+            items.push(docSnap.data() as LibraryItem);
+          });
+          items.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+          setLibraryList(items);
+        } catch (err) {
+          console.error("Firestore library fetch failed, using local storage cache:", err);
+          setLibraryList(getSavedLibrary());
+        }
+
+        if (userProfile && userProfile.voiceSettings) {
+          setVoiceSettings(userProfile.voiceSettings);
+        } else {
+          setVoiceSettings(getSavedVoiceSettings());
+        }
+      } else {
+        setLibraryList(getSavedLibrary());
+        setVoiceSettings(getSavedVoiceSettings());
+      }
+    }
+
+    loadUserData();
+  }, [user, userProfile]);
 
   // Hash-based client router synchronization
   useEffect(() => {
@@ -374,7 +405,7 @@ If the prompt is about baking, mindfulness, fitness, relationships, gaming, pers
       // Save output to creator library records persistent
       const newItem: LibraryItem = {
         id: `lib-${Date.now()}`,
-        timestamp: "Just now",
+        timestamp: new Date().toISOString(),
         prompt: prompt,
         mood: mood,
         duration: duration,
@@ -384,9 +415,22 @@ If the prompt is about baking, mindfulness, fitness, relationships, gaming, pers
         isFavorite: false
       };
 
-      saveLibraryItem(newItem);
-      // reload lists
-      setLibraryList(getSavedLibrary());
+      if (user) {
+        try {
+          await setDoc(doc(db, "users", user.uid, "library", newItem.id), {
+            ...newItem,
+            userId: user.uid
+          });
+          setLibraryList((prev) => [newItem, ...prev]);
+        } catch (err) {
+          console.error("Firestore save failed, falling back local:", err);
+          saveLibraryItem(newItem);
+          setLibraryList(getSavedLibrary());
+        }
+      } else {
+        saveLibraryItem(newItem);
+        setLibraryList(getSavedLibrary());
+      }
 
       // Let the progress controller transition naturally with complete checkmarks
       setIsGenerating(false);
@@ -499,7 +543,7 @@ If the prompt is about baking, mindfulness, fitness, relationships, gaming, pers
       // Save backup generator output to creator library persistent
       const newItem: LibraryItem = {
         id: `lib-fallback-${Date.now()}`,
-        timestamp: "Just now (Local)",
+        timestamp: new Date().toISOString(),
         prompt: cleanPrompt,
         mood: mood,
         duration: duration,
@@ -509,11 +553,25 @@ If the prompt is about baking, mindfulness, fitness, relationships, gaming, pers
         isFavorite: false
       };
       
-      try {
-        saveLibraryItem(newItem);
-        setLibraryList(getSavedLibrary());
-      } catch (saveErr) {
-        console.error("Local save failed, ignoring", saveErr);
+      if (user) {
+        try {
+          await setDoc(doc(db, "users", user.uid, "library", newItem.id), {
+            ...newItem,
+            userId: user.uid
+          });
+          setLibraryList((prev) => [newItem, ...prev]);
+        } catch (err) {
+          console.error("Firestore save backup failed:", err);
+          saveLibraryItem(newItem);
+          setLibraryList(getSavedLibrary());
+        }
+      } else {
+        try {
+          saveLibraryItem(newItem);
+          setLibraryList(getSavedLibrary());
+        } catch (saveErr) {
+          console.error("Local save failed, ignoring", saveErr);
+        }
       }
 
       setIsGenerating(false);
@@ -550,8 +608,16 @@ If the prompt is about baking, mindfulness, fitness, relationships, gaming, pers
         ...existing,
         data: updatedPayload
       };
-      updateLibraryItem(updatedItem);
-      setLibraryList(getSavedLibrary());
+      if (user) {
+        setDoc(doc(db, "users", user.uid, "library", updatedItem.id), {
+          ...updatedItem,
+          userId: user.uid
+        }).catch(err => console.error("Firestore update failed:", err));
+        setLibraryList(prev => prev.map(item => item.id === updatedItem.id ? updatedItem : item));
+      } else {
+        updateLibraryItem(updatedItem);
+        setLibraryList(getSavedLibrary());
+      }
     }
   };
 
@@ -590,9 +656,13 @@ If the prompt is about baking, mindfulness, fitness, relationships, gaming, pers
   };
 
   // Train voice parameters update persistence
-  const handleSaveVoiceSettings = (updated: VoiceSettings) => {
+  const handleSaveVoiceSettings = async (updated: VoiceSettings) => {
     setVoiceSettings(updated);
-    saveVoiceSettings(updated);
+    if (user) {
+      await syncProfileData({ voiceSettings: updated });
+    } else {
+      saveVoiceSettings(updated);
+    }
   };
 
   const handleAnalysisSuccess = (transformedPayload: GeneratedScriptPayload, originalTopic: string) => {
@@ -634,7 +704,7 @@ If the prompt is about baking, mindfulness, fitness, relationships, gaming, pers
     navigateTo("script");
   };
 
-  const handleSaveDraft = (customPromptName?: string) => {
+  const handleSaveDraft = async (customPromptName?: string) => {
     if (!generatedPayload) return;
     const finalName = customPromptName || prompt || "High-Retention Creator Draft";
     
@@ -651,19 +721,17 @@ If the prompt is about baking, mindfulness, fitness, relationships, gaming, pers
 
     // Check for existing element in library
     const existing = libraryList.find(item => item.prompt.toLowerCase() === finalName.toLowerCase());
+    let targetItem: LibraryItem;
     if (existing) {
-      // Update existing item with the latest payload
-      const updatedItem: LibraryItem = {
+      targetItem = {
         ...existing,
-        timestamp: "Updated just now",
+        timestamp: new Date().toISOString(),
         data: generatedPayload
       };
-      updateLibraryItem(updatedItem);
     } else {
-      // Save as completely new draft
-      const newItem: LibraryItem = {
+      targetItem = {
         id: `lib-${Date.now()}`,
-        timestamp: "Saved just now",
+        timestamp: new Date().toISOString(),
         prompt: finalName,
         mood: mood,
         duration: duration,
@@ -672,30 +740,89 @@ If the prompt is about baking, mindfulness, fitness, relationships, gaming, pers
         data: generatedPayload,
         isFavorite: false
       };
-      saveLibraryItem(newItem);
     }
-    
-    // Re-load lists to sync live
-    setLibraryList(getSavedLibrary());
+
+    if (user) {
+      try {
+        await setDoc(doc(db, "users", user.uid, "library", targetItem.id), {
+          ...targetItem,
+          userId: user.uid
+        });
+        setLibraryList(prev => {
+          const index = prev.findIndex(i => i.id === targetItem.id);
+          if (index !== -1) {
+            return prev.map(i => i.id === targetItem.id ? targetItem : i);
+          }
+          return [targetItem, ...prev];
+        });
+      } catch (err) {
+        console.error("Firestore save draft failed:", err);
+      }
+    } else {
+      if (existing) {
+        updateLibraryItem(targetItem);
+      } else {
+        saveLibraryItem(targetItem);
+      }
+      setLibraryList(getSavedLibrary());
+    }
   };
 
-  const handleToggleFavorite = (id: string) => {
+  const handleToggleFavorite = async (id: string) => {
     const item = libraryList.find(i => i.id === id);
+    if (!item) return;
+
     if (item && !item.isFavorite) {
       // Actively adding to favorite: track as preferred layout save success
       trackSaveAction({ prompt: item.prompt, mood: item.mood, contentType: item.contentType, vocabulary: voiceSettings.vocabulary });
     }
-    const updated = toggleFavoriteItem(id);
-    setLibraryList(updated);
+
+    const updatedItem = { ...item, isFavorite: !item.isFavorite };
+
+    if (user) {
+      try {
+        await setDoc(doc(db, "users", user.uid, "library", id), {
+          ...updatedItem,
+          userId: user.uid
+        });
+        setLibraryList(prev => prev.map(i => i.id === id ? updatedItem : i));
+      } catch (err) {
+        console.error("Firestore toggle favorite failed:", err);
+      }
+    } else {
+      const updated = toggleFavoriteItem(id);
+      setLibraryList(updated);
+    }
   };
 
-  const handleRemoveLibraryItem = (id: string) => {
-    const updated = deleteLibraryItem(id);
-    setLibraryList(updated);
+  const handleRemoveLibraryItem = async (id: string) => {
+    if (user) {
+      try {
+        await deleteDoc(doc(db, "users", user.uid, "library", id));
+        setLibraryList(prev => prev.filter(item => item.id !== id));
+      } catch (err) {
+        console.error("Firestore delete failed:", err);
+      }
+    } else {
+      const updated = deleteLibraryItem(id);
+      setLibraryList(updated);
+    }
   };
 
   // Render screens dynamically using Hash state router
   const renderScreen = () => {
+    // Check gated routes requiring Google Authentication
+    const gatedRoutes = ["generating", "script", "creator-director", "next-workflow", "caption", "library"];
+    if (gatedRoutes.includes(currentRoute) && !user) {
+      return (
+        <AuthGuard
+          title="Creator Authentication Required"
+          description="You must authorize your creator account using Google below to unlock deep AI script generation, persistent draft archives, and telemetry metrics."
+          featureBadge="CREATOR ENGINE"
+        />
+      );
+    }
+
     switch (currentRoute) {
       case "create/duration":
         return (
@@ -887,8 +1014,60 @@ If the prompt is about baking, mindfulness, fitness, relationships, gaming, pers
       <div className="absolute top-10 left-1/3 right-1/4 h-48 bg-gradient-to-b from-[#A855F7]/4 to-transparent blur-3xl pointer-events-none" />
 
       {/* Main Responsive Mobile Frame */}
-      <main className="flex-1 w-full max-w-md mx-auto px-5 pt-8 pb-24 relative flex flex-col justify-between">
+      <main className="flex-1 w-full max-w-md mx-auto px-5 pt-4 pb-24 relative flex flex-col justify-between">
         
+        {/* Elegant Cosmic Header and Auth Status */}
+        <header className="flex items-center justify-between py-3 mb-4 border-b border-white/5 relative z-10">
+          <div className="flex items-center gap-1.5 cursor-pointer" onClick={() => navigateTo("home")}>
+            <div className="p-1 rounded-lg bg-gradient-to-tr from-[#FF4FD8]/20 to-[#C8FF5A]/20">
+              <Sparkles className="text-[#C8FF5A]" size={15} />
+            </div>
+            <span className="text-sm font-black tracking-tighter uppercase font-sans label-glow">
+              NANNU <span className="text-[#FF4FD8]">AI</span>
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {user ? (
+              <div className="flex items-center gap-2.5">
+                <div className="text-right hidden sm:block">
+                  <p className="text-[9px] font-mono font-bold text-white leading-none">
+                    {user.displayName || "Creator"}
+                  </p>
+                </div>
+                {user.photoURL ? (
+                  <img
+                    src={user.photoURL}
+                    alt={user.displayName || "Avatar"}
+                    referrerPolicy="no-referrer"
+                    className="w-6 h-6 rounded-full border border-white/15"
+                  />
+                ) : (
+                  <div className="w-6 h-6 rounded-full bg-[#FF4FD8]/10 text-[#FF4FD8] flex items-center justify-center text-[10px] font-bold border border-[#FF4FD8]/20 uppercase">
+                    {(user.displayName || "C")[0]}
+                  </div>
+                )}
+                <button
+                  onClick={signOutUser}
+                  title="Sign Out"
+                  className="p-1 text-[#A1A1AA] hover:text-red-400 rounded-lg bg-white/5 hover:bg-white/10 transition-colors cursor-pointer"
+                >
+                  <LogOut size={12} />
+                </button>
+              </div>
+            ) : (
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => navigateTo("profile")}
+                className="py-1 px-2.5 bg-white/5 hover:bg-[#C8FF5A] hover:text-black rounded-lg border border-white/10 transition-all text-[9.5px] font-mono font-black uppercase cursor-pointer"
+              >
+                Sign In
+              </motion.button>
+            )}
+          </div>
+        </header>
+
         {/* Router transitions animated screen */}
         <div className="flex-1 flex flex-col">
           <AnimatePresence mode="wait">

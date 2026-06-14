@@ -1,0 +1,95 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile with customized voice settings and preferences",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "The Firebase User UID"
+        },
+        "email": {
+          "type": "string",
+          "description": "User registered email address"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Real name of the user"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Account registration timestamp"
+        },
+        "voiceSettings": {
+          "type": "object",
+          "description": "Trained voice preference profiles"
+        },
+        "hiddenPreferences": {
+          "type": "object",
+          "description": "Learnt habits and styles"
+        }
+      },
+      "required": ["uid", "email"]
+    },
+    "LibraryItem": {
+      "title": "LibraryItem",
+      "description": "A saved script draft and associated captions",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier of the library record"
+        },
+        "userId": {
+          "type": "string",
+          "description": "The UID of the user who owns this draft"
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "ISO generation string"
+        },
+        "prompt": {
+          "type": "string",
+          "description": "Topic or idea used to generate this script"
+        },
+        "mood": {
+          "type": "string",
+          "description": "Selected voice tone"
+        },
+        "duration": {
+          "type": "string",
+          "description": "Chosen clip length"
+        },
+        "contentType": {
+          "type": "string",
+          "description": "Video frame template format"
+        },
+        "language": {
+          "type": "string",
+          "description": "Response language translation"
+        },
+        "data": {
+          "type": "object",
+          "description": "The full script, captions, and thumbnails"
+        },
+        "isFavorite": {
+          "type": "boolean",
+          "description": "Whether pinned in library"
+        }
+      },
+      "required": ["id", "userId", "prompt", "data"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "Top-level metadata and styles of a registered creator"
+    },
+    "/users/{userId}/library/{itemId}": {
+      "schema": "LibraryItem",
+      "description": "The historical collection of scripts drafted by this specific creator"
+    }
+  }
+}

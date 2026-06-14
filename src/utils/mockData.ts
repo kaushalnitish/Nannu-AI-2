@@ -42,7 +42,7 @@ export const INITIAL_LIBRARY_ITEMS: LibraryItem[] = [
     prompt: "Why the classic 9-to-5 is officially a toxic paradigm",
     mood: "Aggressive 🔥",
     duration: "60 sec",
-    contentType: "POV",
+    contentType: "Cinematic",
     data: {
       script: {
         hook: {
@@ -76,7 +76,7 @@ export const INITIAL_LIBRARY_ITEMS: LibraryItem[] = [
     prompt: "A simple visualization hack to cure developer's block",
     mood: "Motivational 🚀",
     duration: "30 sec",
-    contentType: "Storytelling",
+    contentType: "Podcast Clip",
     data: {
       script: {
         hook: {

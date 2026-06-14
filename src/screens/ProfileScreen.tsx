@@ -10,6 +10,7 @@ import GlowCard from "../components/GlowCard";
 import { getSavedPreferenceProfile, savePreferenceProfile, PreferenceProfile, getAnalyticsEvents, clearAnalyticsEvents, logAnalyticsEvent } from "../utils/preferences";
 import { getSavedLibrary, deleteLibraryItem, toggleFavoriteItem, getSavedVoiceSettings, saveVoiceSettings } from "../utils/mockData";
 import { LibraryItem, VoiceSettings } from "../types";
+import { useAuth } from "../lib/authContext";
 
 interface ProfileScreenProps {
   scriptsCount: number;
@@ -50,6 +51,8 @@ export default function ProfileScreen({
   onClearInitialSection,
   onSelectScript
 }: ProfileScreenProps) {
+  const { user, userProfile, syncProfileData, signInWithGoogle, signOutUser } = useAuth();
+
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   
@@ -61,6 +64,21 @@ export default function ProfileScreen({
   const [creatorBio, setCreatorBio] = useState("Digital SaaS Entrepreneur & High-Retention Video Producer");
   const [creatorHandle, setCreatorHandle] = useState("@nitish_design");
   const [creatorEmail, setCreatorEmail] = useState("kaushalnitish001@gmail.com");
+
+  // Sync profile data dynamically with authenticated user session
+  useEffect(() => {
+    if (user) {
+      setCreatorName(user.displayName || userProfile?.displayName || "Autonomous Creator");
+      setCreatorEmail(user.email || "kaushalnitish001@gmail.com");
+      setCreatorBio(userProfile?.bio || "Digital SaaS Entrepreneur & High-Retention Video Producer");
+      setCreatorHandle(userProfile?.handle || ("@" + (user.displayName || "creator").toLowerCase().replace(/\s+/g, "")));
+    } else {
+      setCreatorName(localStorage.getItem("nannu_profile_name") || "Nitish Kaushal");
+      setCreatorEmail("kaushalnitish001@gmail.com");
+      setCreatorBio(localStorage.getItem("nannu_profile_bio") || "Digital SaaS Entrepreneur & High-Retention Video Producer");
+      setCreatorHandle(localStorage.getItem("nannu_profile_handle") || "@nitish_design");
+    }
+  }, [user, userProfile]);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [profileSuccessMsg, setProfileSuccessMsg] = useState(false);
 
@@ -296,6 +314,17 @@ export default function ProfileScreen({
 
   const handleSaveProfileInfo = () => {
     setIsEditingProfile(false);
+    if (user) {
+      syncProfileData({
+        displayName: creatorName,
+        bio: creatorBio,
+        handle: creatorHandle
+      }).catch(err => console.error("Firestore sync failed:", err));
+    } else {
+      localStorage.setItem("nannu_profile_name", creatorName);
+      localStorage.setItem("nannu_profile_bio", creatorBio);
+      localStorage.setItem("nannu_profile_handle", creatorHandle);
+    }
     setProfileSuccessMsg(true);
     setTimeout(() => setProfileSuccessMsg(false), 2000);
   };
@@ -374,12 +403,21 @@ export default function ProfileScreen({
               <div className="flex items-center gap-4 relative z-10">
                 <div className="relative shrink-0">
                   <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-[#FF4FD8] via-[#A855F7] to-[#C8FF5A] p-0.5 shadow-md">
-                    <div className="w-full h-full rounded-full bg-[#050505] flex items-center justify-center font-bold text-xs text-white uppercase font-sans">
-                      {creatorName.split(" ").map(n=>n[0]).join("")}
-                    </div>
+                    {user && user.photoURL ? (
+                      <img
+                        src={user.photoURL}
+                        alt={creatorName}
+                        referrerPolicy="no-referrer"
+                        className="w-full h-full rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full rounded-full bg-[#050505] flex items-center justify-center font-bold text-xs text-white uppercase font-sans">
+                        {creatorName.split(" ").map(n=>n[0]).join("")}
+                      </div>
+                    )}
                   </div>
                   <div className="absolute -bottom-1 -right-1 bg-[#C8FF5A] text-black text-[7.5px] font-mono font-bold px-1.5 py-0.5 rounded-full border border-black uppercase scale-90">
-                    Pro
+                    {user ? "Cloud" : "Guest"}
                   </div>
                 </div>
                 <div className="font-sans text-left">
@@ -387,16 +425,27 @@ export default function ProfileScreen({
                   <p className="text-[10px] text-[#A1A1AA] font-mono leading-none">{creatorHandle}</p>
                   <div className="inline-flex items-center gap-1 mt-2.5 bg-white/5 py-1 px-3.5 rounded-full border border-white/5">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#C8FF5A] animate-pulse" />
-                    <span className="text-[8.5px] font-mono text-white tracking-widest uppercase">SYD-4 CORE ACTIVE</span>
+                    <span className="text-[8.5px] font-mono text-white tracking-widest uppercase">
+                      {user ? "Verified Account" : "Local Prototype"}
+                    </span>
                   </div>
                 </div>
               </div>
-              <button
-                onClick={() => setActiveSection("profile")}
-                className="text-[10px] font-mono font-bold text-[#FF4FD8] bg-white/5 hover:bg-white/10 transition-colors py-1 px-2.5 rounded-md border border-white/5 cursor-pointer"
-              >
-                EDIT
-              </button>
+              {user ? (
+                <button
+                  onClick={() => setActiveSection("profile")}
+                  className="text-[10px] font-mono font-bold text-[#FF4FD8] bg-white/5 hover:bg-white/10 transition-colors py-1 px-2.5 rounded-md border border-white/5 cursor-pointer"
+                >
+                  EDIT
+                </button>
+              ) : (
+                <button
+                  onClick={signInWithGoogle}
+                  className="text-[10px] font-mono font-extrabold text-black bg-[#C8FF5A] hover:bg-opacity-95 transition-all py-1.5 px-3.5 rounded-lg border border-transparent cursor-pointer font-bold uppercase"
+                >
+                  SIGN IN
+                </button>
+              )}
             </GlowCard>
 
             {/* Sub-menu grid index items block */}
@@ -611,10 +660,6 @@ export default function ProfileScreen({
                 <div className="flex items-center justify-between p-2.5 bg-white/[0.01] border border-white/5 rounded-xl">
                   <span className="text-[#A1A1AA]">Instagram Reels Feed</span>
                   <span className="text-emerald-400 font-bold uppercase text-[9px] font-mono">LINKED ✅</span>
-                </div>
-                <div className="flex items-center justify-between p-2.5 bg-white/[0.01] border border-white/5 rounded-xl">
-                  <span className="text-[#A1A1AA]">TikTok Channel</span>
-                  <span className="text-[#FF4FD8] font-bold uppercase text-[9px] font-mono">LINK NOW ➜</span>
                 </div>
               </div>
             </GlowCard>

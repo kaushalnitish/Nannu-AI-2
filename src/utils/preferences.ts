@@ -110,7 +110,7 @@ export function trackCopyAction(metadata: {
   if (metadata.mood.toLowerCase().includes("aggressive") || metadata.mood.toLowerCase().includes("roast")) {
     incrementWeight(profile.preferredHookStyle, "Agitate Pain & Savage Truth", 4);
     profile.sentenceLengthTrend = "short";
-  } else if (metadata.contentType === "Storytelling") {
+  } else if (metadata.contentType === "Cinematic") {
     incrementWeight(profile.preferredHookStyle, "Vulnerability & Metaphor Story", 4);
     profile.sentenceLengthTrend = "long & explanatory";
   } else {
@@ -152,7 +152,7 @@ export function trackSaveAction(metadata: {
     incrementWeight(profile.preferredVocabulary, metadata.vocabulary, 4);
   }
 
-  incrementWeight(profile.preferredHookStyle, metadata.contentType === "Storytelling" ? "Personal/Observation metaphor" : "Bold contrast facts", 3);
+  incrementWeight(profile.preferredHookStyle, metadata.contentType === "Cinematic" ? "Personal/Observation metaphor" : "Bold contrast facts", 3);
 
   // Store successful topics
   if (metadata.prompt && !profile.successfulPatterns.includes(metadata.prompt)) {

@@ -102,19 +102,17 @@ export default function WelcomeScreen({
   ];
 
   const formatPresets = [
-    { name: "Talking Head", icon: "🎙️" },
-    { name: "Storytelling", icon: "📖" },
-    { name: "POV", icon: "🎥" },
-    { name: "Carousel", icon: "📱" },
-    { name: "Opinion", icon: "💬" },
-    { name: "List Style", icon: "📊" }
+    { name: "Talking Head", icon: "🎤" },
+    { name: "Cinematic", icon: "🎬" },
+    { name: "Product Pitch", icon: "📦" },
+    { name: "Podcast Clip", icon: "🎙️" }
   ];
 
   const moodPresets = [
     { name: "Confident 😎" },
-    { name: "Savage 🌶️" },
-    { name: "Storyteller 📖" },
-    { name: "Inspirational ✨" }
+    { name: "Funny 😂" },
+    { name: "Emotional ❤️" },
+    { name: "High Energy 🚀" }
   ];
 
   return (

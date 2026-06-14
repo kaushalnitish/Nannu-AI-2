@@ -636,9 +636,10 @@ export default function AnalyzeScreen({ onBack, onAnalysisSuccess }: AnalyzeScre
                       onChange={(e) => setTargetContentType(e.target.value)}
                       className="w-full bg-black/90 border border-white/20 rounded-xl px-3.5 py-2.5 text-xs text-white font-bold focus:outline-none focus:border-[#FF4FD8] focus:ring-1 focus:ring-[#FF4FD8] mt-1.5 cursor-pointer"
                     >
-                      <option value="Talking Head">Talking Head with spotlight</option>
-                      <option value="Personal Storytelling">Personal Narrative Vlog</option>
-                      <option value="Docu-Style B-Roll">Voiceover b-roll document</option>
+                      <option value="Talking Head">🎤 Talking Head</option>
+                      <option value="Cinematic">🎬 Cinematic</option>
+                      <option value="Product Pitch">📦 Product Pitch</option>
+                      <option value="Podcast Clip">🎙️ Podcast Clip</option>
                     </select>
                   </div>
                 </div>

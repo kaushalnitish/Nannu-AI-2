@@ -18,7 +18,7 @@ export default function LibraryScreen({
   onDeleteItem
 }: LibraryScreenProps) {
   const [searchTerm, setSearchTerm] = useState("");
-  const [filter, setFilter] = useState<"All" | "Favorites" | "Talking Head" | "Storytelling">("All");
+  const [filter, setFilter] = useState<"All" | "Favorites" | "Talking Head" | "Cinematic" | "Product Pitch" | "Podcast Clip">("All");
 
   const filteredItems = libraryList.filter((item) => {
     const matchesSearch = item.prompt.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -28,8 +28,12 @@ export default function LibraryScreen({
       return matchesSearch && item.isFavorite;
     } else if (filter === "Talking Head") {
       return matchesSearch && item.contentType === "Talking Head";
-    } else if (filter === "Storytelling") {
-      return matchesSearch && item.contentType === "Storytelling";
+    } else if (filter === "Cinematic") {
+      return matchesSearch && item.contentType === "Cinematic";
+    } else if (filter === "Product Pitch") {
+      return matchesSearch && item.contentType === "Product Pitch";
+    } else if (filter === "Podcast Clip") {
+      return matchesSearch && item.contentType === "Podcast Clip";
     }
 
     return matchesSearch;
@@ -67,7 +71,7 @@ export default function LibraryScreen({
 
       {/* Categories chips filter layout */}
       <div className="flex gap-2 mb-5 overflow-x-auto pb-1 select-none scrollbar-none font-sans">
-        {(["All", "Favorites", "Talking Head", "Storytelling"] as const).map((cat) => (
+        {(["All", "Favorites", "Talking Head", "Cinematic", "Product Pitch", "Podcast Clip"] as const).map((cat) => (
           <button
             key={cat}
             onClick={() => setFilter(cat)}
